@@ -1,261 +1,202 @@
-🎓 Campus Sync
+# 🎓 Campus Sync
 
-A full-stack campus management platform built with Django REST Framework (Backend) and React + TypeScript (Frontend).
+A full-stack campus management platform built with **Django REST Framework (Backend)** and **React + TypeScript (Frontend)**.  
 It allows students and organizers to manage clubs, events, and communicate via real-time-style messaging.
 
 ---
 
-🚀 Features
+## 🚀 Features
 
-👥 Authentication & Users
+### 👥 Authentication & Users
+- JWT-based authentication  
+- Role-based access (Student / Organizer / Admin)  
+- Profile management  
+- Change password  
 
-- JWT-based authentication
-- Role-based access (Student / Organizer / Admin)
-- Profile management
-- Change password
+### 🏫 Clubs
+- Create and manage clubs  
+- Assign organizer to each club  
+- Upload club image  
+- View club details  
 
-🏫 Clubs
+### 📅 Events
+- Organizers can create events  
+- Upcoming & past event filtering  
+- Event listing per club  
 
-- Create and manage clubs
-- Assign organizer to each club
-- Upload club image
-- View club details
+### 💬 Messaging System
+- One-to-one chat between users  
+- Conversation creation  
+- Send & receive messages  
+- Auto-load chat from URL  
+- Modern chat UI  
 
-📅 Events
-
-- Organizers can create events
-- Upcoming & past event filtering
-- Event listing per club
-
-💬 Messaging System
-
-- One-to-one chat between users
-- Conversation creation
-- Send & receive messages
-- Auto-load chat from URL
-- Modern chat UI
-
-🎨 UI/UX
-
-- Clean dashboard layout
-- Sidebar navigation
-- Responsive design
-- Smooth animations (Framer Motion)
+### 🎨 UI/UX
+- Clean dashboard layout  
+- Sidebar navigation  
+- Responsive design  
+- Smooth animations (Framer Motion)  
 
 ---
 
-🏗️ Tech Stack
+## 🏗️ Tech Stack
 
-🔹 Backend
+### 🔹 Backend
+- Python  
+- Django  
+- Django REST Framework  
+- SQLite (default, can switch to PostgreSQL)  
+- JWT Authentication  
 
-- Python
-- Django
-- Django REST Framework
-- SQLite (default, can switch to PostgreSQL)
-- JWT Authentication
-
-🔹 Frontend
-
-- React (Vite)
-- TypeScript
-- Tailwind CSS
-- React Query
-- Axios
-- Framer Motion
-- ShadCN UI
+### 🔹 Frontend
+- React (Vite)  
+- TypeScript  
+- Tailwind CSS  
+- React Query  
+- Axios  
+- Framer Motion  
+- ShadCN UI  
 
 ---
 
-📁 Project Structure
+## 📁 Project Structure
 
 project/
+
 │
+
 ├── backend/
+
 │   ├── users/
+
 │   ├── clubs/
+
 │   ├── events/
+
 │   ├── chat/
-│   ├── manage.py
+
+│   └── manage.py
+
 │
+
 ├── campus-connect/   (frontend)
+
 │   ├── src/
+
 │   │   ├── pages/
+
 │   │   ├── components/
+
 │   │   ├── lib/
+
 │   │   ├── contexts/
+
 │
+
 ├── venv/
+
 ├── requirements.txt
+
 └── README.md
+
+
 
 ---
 
-⚙️ Backend Setup (Django)
+## ⚙️ Backend Setup (Django)
 
-1️⃣ Create Virtual Environment
-
+```bash
+# 1️⃣ Create Virtual Environment
 python -m venv venv
 venv\Scripts\activate   # Windows
 
-2️⃣ Install Dependencies
-
+# 2️⃣ Install Dependencies
 pip install -r requirements.txt
 
-3️⃣ Apply Migrations
-
+# 3️⃣ Apply Migrations
 python manage.py makemigrations
 python manage.py migrate
 
-4️⃣ Create Superuser
-
+# 4️⃣ Create Superuser
 python manage.py createsuperuser
 
-5️⃣ Run Server
-
+# 5️⃣ Run Server
 python manage.py runserver
+```
 
-👉 Backend runs at:
-"http://127.0.0.1:8000"
 
----
-
-🌐 Frontend Setup (React)
-
-1️⃣ Install Dependencies
-
+## 🌐 Frontend Setup (React)
+### 1️⃣ Install Dependencies
+```bash
 npm install
 
-2️⃣ Run Development Server
+# 2️⃣ Run Development Server
+npm run dev 
+```
 
-npm run dev
 
-👉 Frontend runs at:
-"http://localhost:8080"
+## 🔐 API Endpoints
+### Auth
+- POST /api/login/
 
----
+- POST /api/register/
 
-🔐 API Endpoints
+### Clubs
+- GET /api/clubs/
 
-🔹 Auth
+- GET /api/clubs/:id/
 
-- "POST /api/login/"
-- "POST /api/register/"
+- POST /api/clubs/
 
-🔹 Clubs
+### Events
+- GET /api/events/
 
-- "GET /api/clubs/"
-- "GET /api/clubs/:id/"
-- "POST /api/clubs/"
+- POST /api/events/
 
-🔹 Events
+### Chat
+- GET /api/chat/conversations/
 
-- "GET /api/events/"
-- "POST /api/events/"
+- GET /api/chat/messages/:id/
 
-🔹 Chat
+- POST /api/chat/send/
 
-- "GET /api/chat/conversations/"
-- "GET /api/chat/messages/:id/"
-- "POST /api/chat/send/"
-- "POST /api/chat/create/"
+- POST /api/chat/create/
 
----
 
-🔑 Authentication
 
-Uses JWT tokens
-
+## 🔑 Authentication
+Uses JWT tokens.
 Frontend stores:
 
-- access token
-- refresh token
+- Access token
 
-Add token in headers:
+- Refresh token
 
+- Add token in headers:
+
+```
 Authorization: Bearer <access_token>
+```
 
----
 
-💡 Key Concepts
-
+## 💡 Key Concepts
 🧠 Conversation Logic
-
 - A conversation is created between 2 users
 - If already exists → reuse it
 - Messages belong to a conversation
 
 🎯 Organizer Logic
-
 - Only organizers can create events
 - Others can message the club
 
----
 
-🛠️ Common Issues & Fixes
-
-❌ 401 Unauthorized
-
-👉 Add JWT token in API headers
-
----
-
-❌ Conversations not loading
-
-👉 Check:
-
-- user is authenticated
-- token exists in localStorage
-
----
-
-❌ Duplicate app error
-
-Application labels aren't unique
-
-👉 Rename app (avoid "messages")
-
----
-
-📸 Screenshots
-
-- Dashboard
-- Club Profile
-- Chat UI
-- Events Page
-
-(Add screenshots here)
-
----
-
-🚀 Future Improvements
-
+## 🚀 Future Improvements
 - 🔥 Real-time chat (WebSockets)
+
 - 🔔 Notifications
+
 - 📷 File/image sharing
+
 - 👥 Group chats
+
 - 🌙 Dark mode
-
----
-
-🤝 Contributing
-
-1. Fork the repo
-2. Create a new branch
-3. Commit changes
-4. Push & create PR
-
----
-
-📄 License
-
-This project is for educational purposes.
-
----
-
-👨‍💻 Author
-
-Sanjay Kumar Sah
-
----
-
-⭐ If you like this project, give it a star!
