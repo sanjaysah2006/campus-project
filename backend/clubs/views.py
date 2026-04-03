@@ -17,18 +17,18 @@ class ClubListView(APIView):
 
         clubs = Club.objects.filter(approved=True)
 
-        serializer = ClubSerializer(clubs, many=True)
+        serializer = ClubSerializer(clubs, many=True, context={"request": request})
 
         return Response(serializer.data)
-
 
 class ClubDetailView(RetrieveAPIView):
 
     permission_classes = [IsAuthenticated]
-
     queryset = Club.objects.all()
-
     serializer_class = ClubSerializer
+
+    def get_serializer_context(self):
+        return {"request": self.request}
 
 
 class ClubCreateView(APIView):

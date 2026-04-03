@@ -2,12 +2,13 @@ from django.urls import path
 
 from users.views import ChangePasswordView, ProfileView, StudentListView, UpdateProfileView
 from .views import (
-    # AdminAllEventsView,
+    AdminAllEventsView,
     ApproveEventView,
     CreateEventView,
 
     EventDetailView,
     EventListView,
+    ExportEventRegistrationsView,
   
     StudentDashboardView,
     EventRegisterView,
@@ -40,10 +41,11 @@ urlpatterns = [
    
     # Organizer
     path("organizer/events/history/", OrganizerEventHistoryView.as_view()),
+    path("events/<int:event_id>/registrations/export/", ExportEventRegistrationsView.as_view()),
 
     # Admin
     path("admin/events/<int:event_id>/approve/", ApproveEventView.as_view()),
     path("admin/events/pending/", AdminPendingEventsView.as_view()),
     path("admin/dashboard/", AdminDashboardStats.as_view()),
-    # path("admin/events/all/", AdminAllEventsView.as_view()),
+    path("admin/events/all/", AdminAllEventsView.as_view()),
 ]

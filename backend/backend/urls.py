@@ -13,10 +13,12 @@ urlpatterns = [
     path("api/login/", LoginView.as_view()),
     path("api/token/refresh/", TokenRefreshView.as_view()),
     path("api/register/student/", StudentRegisterView.as_view()),
+    path("api/chat/", include("chat.urls")),
 
     # Include Apps
     path("api/", include("clubs.urls")),
     path("api/", include("events.urls")),
+    path("api/requests/", include("requests.urls")),
 
 ]
 

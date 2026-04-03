@@ -7,17 +7,13 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
-from rest_framework.parsers import MultiPartParser, FormParser
+
 
 from openpyxl import Workbook
-
+from openpyxl.styles import Font
 from .models import Event, EventInteraction, EventRegistration
-from .serializers import EventCreateSerializer, EventSerializer
+from .serializers import EventSerializer
 from clubs.models import Club
-
-
-import re
-from PIL import Image
 
 
 # ================================
@@ -67,7 +63,7 @@ class EventListView(APIView):
 
         events = Event.objects.filter(approved=True).order_by("-date")
 
-        serializer = EventSerializer(events, many=True)
+        serializer = EventSerializer(events, many=True, context={"request": request})
 
         return Response(serializer.data)
 
@@ -157,7 +153,7 @@ class EventRecommendationView(APIView):
         events = Event.objects.filter(
             approved=True,
             category=top_category["event__category"],
-            end_datetime__gte=now()
+            date__gte=now()
         ).exclude(id__in=registered_ids)
 
         serializer = EventSerializer(
@@ -199,24 +195,24 @@ class ApproveEventView(APIView):
 # =====================================================
 # ADMIN ALL EVENTS
 # =====================================================
-# class AdminAllEventsView(APIView):
+class AdminAllEventsView(APIView):
 
-#     permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
-#     def get(self, request):
+    def get(self, request):
 
-#         if request.user.role != "ADMIN":
-#             return Response({"detail": "Not allowed"}, status=403)
+        if request.user.role != "ADMIN":
+            return Response({"detail": "Not allowed"}, status=403)
 
-#         events = Event.objects.select_related("club").all().order_by("-created_at")
+        events = Event.objects.select_related("club").all().order_by("-created_at")
 
-#         serializer = EventSerializer(
-#             events,
-#             many=True,
-#             context={"request": request}
-#         )
+        serializer = EventSerializer(
+            events,
+            many=True,
+            context={"request": request}
+        )
 
-#         return Response(serializer.data)
+        return Response(serializer.data)
 
 
 # =====================================================
@@ -261,7 +257,7 @@ class AdminDashboardStats(APIView):
             "pending_events": Event.objects.filter(approved=False).count(),
             "active_events": Event.objects.filter(
                 approved=True,
-                end_datetime__gte=now()
+                date__gte=now()
             ).count(),
             "total_registrations": EventRegistration.objects.count(),
         }
@@ -325,11 +321,21 @@ class EventDetailView(APIView):
 
     def get(self, request, pk):
 
-        event = get_object_or_404(Event, id=pk)
+        event = get_object_or_404(Event, id=pk, approved=True)
 
-        serializer = EventSerializer(event)
+        serializer = EventSerializer(event,many=True, context={"request": request})
 
         return Response(serializer.data)
+
+
+from django.http import HttpResponse
+from django.shortcuts import get_object_or_404
+from rest_framework.views import APIView
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from openpyxl import Workbook
+
+from .models import Event, EventRegistration
 
 
 # =====================================================
@@ -341,78 +347,85 @@ class ExportEventRegistrationsView(APIView):
 
     def get(self, request, event_id):
 
+        # ✅ FIRST: GET EVENT
+        event = get_object_or_404(Event, id=event_id)
+
+        # ✅ PERMISSION CHECK (CLEAN)
+        if request.user.role == "ORGANIZER" and event.club.organizer != request.user:
+            return Response({"detail": "Not allowed"}, status=403)
+
         if request.user.role not in ["ADMIN", "ORGANIZER"]:
             return Response({"detail": "Not allowed"}, status=403)
 
-        event = get_object_or_404(Event, id=event_id)
-
+        # ✅ FETCH DATA
         registrations = EventRegistration.objects.filter(
             event=event
-        ).select_related("student")
+        ).select_related("student", "student__student_profile")
 
+        # ✅ EXCEL
         wb = Workbook()
         ws = wb.active
         ws.title = "Registrations"
 
-        ws.append(["Student Name", "Email", "Registered At"])
+        # ✅ EVENT TITLE
+        ws.append([f"Event: {event.title}"])
+        ws.append([])
 
+        # ✅ HEADERS
+        ws.append([
+            "Name",
+            "Roll No",
+            "Course",
+            "Batch",
+            "Semester",
+            "Section",
+            "Phone",
+            "Email",
+            "Registered At"
+        ])
+        for cell in ws[3]:
+            cell.font = Font(bold=True)
+
+            
+        # ✅ DATA
         for reg in registrations:
+            student = reg.student
+            profile = getattr(student, "student_profile", None)
+
             ws.append([
-                reg.student.username,
-                reg.student.email,
-                reg.registered_at.strftime("%Y-%m-%d %H:%M")
+                profile.name if profile else "",
+                profile.roll_no if profile else "",
+                profile.course if profile else "",
+                profile.batch if profile else "",
+                profile.semester if profile else "",
+                profile.section if profile else "",
+                profile.phone if profile else "",
+                student.email,
+                reg.registered_at.strftime("%Y-%m-%d %H:%M"),
             ])
 
+        # ✅ AUTO WIDTH
+        for col in ws.columns:
+            max_length = 0
+            col_letter = col[0].column_letter
+
+            for cell in col:
+                try:
+                    if cell.value:
+                        max_length = max(max_length, len(str(cell.value)))
+                except:
+                    pass
+
+            ws.column_dimensions[col_letter].width = max_length + 2
+
+        # ✅ RESPONSE
         response = HttpResponse(
             content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         )
 
-        response["Content-Disposition"] = f'attachment; filename="event_{event.id}_registrations.xlsx"'
+        response["Content-Disposition"] = (
+            f'attachment; filename="event_{event.id}_registrations.xlsx"'
+        )
 
         wb.save(response)
-
         return response
-
-
-# =====================================================
-# ID CARD OCR SCAN
-# =====================================================
-class ScanStudentID(APIView):
-
-    parser_classes = [MultiPartParser]
-
-    def post(self, request):
-
-        image = request.FILES.get("image")
-
-        if not image:
-            return Response({"error": "No image uploaded"}, status=400)
-
-        try:
-
-            img = Image.open(image)
-
-            text = pytesseract.image_to_string(img)
-
-            roll = re.search(r"Roll\s*No\s*:\s*(\d+)", text)
-            name = re.search(r"Name\s*:\s*([A-Za-z ]+)", text)
-            course = re.search(r"B\.TECH[- ]?[A-Z]+", text)
-            batch = re.search(r"\d{4}-\d{2}", text)
-
-            return Response({
-                "name": name.group(1) if name else None,
-                "roll_no": roll.group(1) if roll else None,
-                "course": course.group(0) if course else None,
-                "batch": batch.group(0) if batch else None
-            })
-
-        except Exception as e:
-            return Response({
-                "error": "OCR failed",
-                "details": str(e)
-            }, status=500)
-        
-
-
-
-

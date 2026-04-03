@@ -45,11 +45,66 @@ class ClubCreateSerializer(serializers.ModelSerializer):
 
 class ClubSerializer(serializers.ModelSerializer):
 
-    organizer_name = serializers.CharField(
-        source="organizer.username",
-        read_only=True
-    )
+    image = serializers.SerializerMethodField()
+
+    organizer        = serializers.SerializerMethodField()
+    organizer_name   = serializers.SerializerMethodField()
+    organizer_email  = serializers.SerializerMethodField()
+    organizer_phone  = serializers.SerializerMethodField()
+    organizer_rollno = serializers.SerializerMethodField()
+
+    def get_image(self, obj):
+        request = self.context.get("request")
+        if obj.image and request:
+            return f"{request.scheme}://{request.get_host()}{obj.image.url}"
+        return None
+
+    def _get_profile(self, obj):
+        try:
+            return obj.organizer.student_profile if obj.organizer else None
+        except:
+            return None
+
+    def get_organizer(self, obj):
+        return obj.organizer.id if obj.organizer else None
+
+    def get_organizer_name(self, obj):
+        profile = self._get_profile(obj)
+        if profile and profile.name:
+            return profile.name
+
+        if obj.organizer:
+            full_name = obj.organizer.get_full_name()
+            return full_name.strip() if full_name.strip() else obj.organizer.username
+
+        return None
+
+    def get_organizer_email(self, obj):
+        return obj.organizer.email if obj.organizer else None
+
+    def get_organizer_phone(self, obj):
+        profile = self._get_profile(obj)
+        return profile.phone if profile else None
+
+    def get_organizer_rollno(self, obj):
+        profile = self._get_profile(obj)
+        return profile.roll_no if profile else (
+            obj.organizer.username if obj.organizer else None
+        )
 
     class Meta:
         model = Club
-        fields = "__all__"
+        fields = [
+            "id",
+            "name",
+            "description",
+            "category",
+            "image",
+            "approved",
+            "created_at",
+            "organizer",
+            "organizer_name",
+            "organizer_email",
+            "organizer_phone",
+            "organizer_rollno",
+        ]
