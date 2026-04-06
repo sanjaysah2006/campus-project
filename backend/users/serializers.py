@@ -3,6 +3,9 @@ from .models import User, StudentProfile
 from datetime import datetime
 
 
+# -------------------------------
+# 🔐 STUDENT REGISTRATION SERIALIZER
+# -------------------------------
 class StudentRegisterSerializer(serializers.Serializer):
 
     name = serializers.CharField()
@@ -12,18 +15,28 @@ class StudentRegisterSerializer(serializers.Serializer):
     phone = serializers.CharField()
     password = serializers.CharField(write_only=True)
 
+    # for upload
     id_card = serializers.ImageField(required=False)
 
+    # -------------------------------
+    # VALIDATION
+    # -------------------------------
     def validate_roll_no(self, value):
-
         if User.objects.filter(username=value).exists():
             raise serializers.ValidationError(
                 "Student with this roll number already exists."
             )
-
         return value
 
+    def validate_id_card(self, value):
+        # optional: file size limit (2MB)
+        if value and value.size > 2 * 1024 * 1024:
+            raise serializers.ValidationError("File too large (max 2MB)")
+        return value
 
+    # -------------------------------
+    # HELPER FUNCTIONS
+    # -------------------------------
     def get_batch(self, roll):
 
         if roll.startswith("1123"):
@@ -37,7 +50,6 @@ class StudentRegisterSerializer(serializers.Serializer):
 
         return "Unknown"
 
-
     def calculate_semester(self, batch):
 
         if batch == "Unknown":
@@ -48,15 +60,11 @@ class StudentRegisterSerializer(serializers.Serializer):
 
         semester = (current_year - year) * 2 + 1
 
-        if semester < 1:
-            semester = 1
+        return max(1, min(semester, 8))
 
-        if semester > 8:
-            semester = 8
-
-        return semester
-
-
+    # -------------------------------
+    # CREATE USER + PROFILE
+    # -------------------------------
     def create(self, validated_data):
 
         name = validated_data["name"]
@@ -65,6 +73,7 @@ class StudentRegisterSerializer(serializers.Serializer):
         batch = self.get_batch(roll)
         semester = self.calculate_semester(batch)
 
+        # create user
         user = User.objects.create_user(
             username=roll,
             email=validated_data["email"],
@@ -73,6 +82,7 @@ class StudentRegisterSerializer(serializers.Serializer):
             first_name=name
         )
 
+        # create profile (Cloudinary handles image automatically)
         StudentProfile.objects.create(
             user=user,
             name=name,
@@ -82,7 +92,27 @@ class StudentRegisterSerializer(serializers.Serializer):
             semester=semester,
             section=validated_data["section"],
             phone=validated_data["phone"],
-            id_card=validated_data.get("id_card")
+            id_card=validated_data.get("id_card")  # ✅ Cloudinary upload
         )
 
         return user
+
+
+# -------------------------------
+# 📦 STUDENT PROFILE SERIALIZER (FOR RESPONSE)
+# -------------------------------
+class StudentProfileSerializer(serializers.ModelSerializer):
+
+    id_card = serializers.SerializerMethodField()
+
+    def get_id_card(self, obj):
+        if obj.id_card:
+            try:
+                return obj.id_card.url  # ✅ Cloudinary URL
+            except:
+                return None
+        return None
+
+    class Meta:
+        model = StudentProfile
+        fields = "__all__"

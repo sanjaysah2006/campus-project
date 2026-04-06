@@ -54,9 +54,11 @@ class ClubSerializer(serializers.ModelSerializer):
     organizer_rollno = serializers.SerializerMethodField()
 
     def get_image(self, obj):
-        request = self.context.get("request")
-        if obj.image and request:
-            return f"{request.scheme}://{request.get_host()}{obj.image.url}"
+        if obj.image:
+            try:
+                return obj.image.url
+            except:
+                return None
         return None
 
     def _get_profile(self, obj):

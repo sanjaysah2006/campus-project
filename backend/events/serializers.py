@@ -8,11 +8,11 @@ class EventCreateSerializer(serializers.ModelSerializer):
         fields = [
             "title",
             "description",
-            "category",
-            "poster",
-            "venue",
-            "start_datetime",
-            "end_datetime",
+            "club",
+            "organizer",
+            "date",
+            "location",
+            "image",
         ]
 
 
@@ -22,17 +22,11 @@ class EventSerializer(serializers.ModelSerializer):
     club_name = serializers.CharField(source="club.name", read_only=True)
 
     def get_image(self, obj):
-        request = self.context.get("request")
-
-        if obj.image and request:
-            url = obj.image.url
-
-            # 🔥 force ngrok domain
-            host = request.get_host()
-            scheme = request.scheme
-
-            return f"{scheme}://{host}{url}"
-
+        if obj.image:
+            try:
+                return obj.image.url
+            except:
+                return None
         return None
 
     def get_registrations(self, obj):
