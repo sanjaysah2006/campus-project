@@ -12,7 +12,7 @@ from .views import (
   
     StudentDashboardView,
     EventRegisterView,
-    EventRecommendationView,
+ 
     AdminPendingEventsView,
     AdminDashboardStats,
     EventViewTrack,
@@ -32,7 +32,6 @@ urlpatterns = [
     path("student/events/", StudentDashboardView.as_view()),
     path("student/events/<int:event_id>/register/", EventRegisterView.as_view()),
     path("student/events/<int:event_id>/view/", EventViewTrack.as_view()),
-    path("student/recommendations/", EventRecommendationView.as_view()), 
     path("students/", StudentListView.as_view()),
     path("profile/", ProfileView.as_view()),
     path("profile/update/", UpdateProfileView.as_view()),
