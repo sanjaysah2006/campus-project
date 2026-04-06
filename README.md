@@ -1,4 +1,3 @@
----
 
 # 🎓 Campus Sync
 
