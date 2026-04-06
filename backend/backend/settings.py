@@ -96,7 +96,14 @@ cloudinary.config(
     api_secret = "2dlfpfEmPpMOQxDAGwq8hNB8r1E",
 )
 
-DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+STORAGES = {
+    "default": {
+        "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+    },
+}
 
 DATABASES = {
     'default': {
