@@ -16,10 +16,6 @@ class EventCreateSerializer(serializers.ModelSerializer):
         ]
 
 
-from rest_framework import serializers
-from .models import Event
-
-
 class EventSerializer(serializers.ModelSerializer):
 
     image = serializers.SerializerMethodField()
@@ -30,7 +26,13 @@ class EventSerializer(serializers.ModelSerializer):
     def get_image(self, obj):
         if obj.image:
             try:
-                return obj.image.url
+                url = obj.image.url
+
+            # 🔥 skip old local media paths
+                if url.startswith("/media"):
+                    return None
+
+                return url
             except:
                 return None
         return None
