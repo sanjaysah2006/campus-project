@@ -1,202 +1,271 @@
+---
+
 # 🎓 Campus Sync
 
-A full-stack campus management platform built with **Django REST Framework (Backend)** and **React + TypeScript (Frontend)**.  
-It allows students and organizers to manage clubs, events, and communicate via real-time-style messaging.
+A full-stack campus management platform built with **Django REST Framework (Backend)** and **React + TypeScript (Frontend)**.
+
+👉 **Live Demo**
+
+* 🌐 Frontend: [https://campus-project-eight.vercel.app/](https://campus-project-eight.vercel.app/)
+* 🔗 Backend API: [https://campus-sync-rjbz.onrender.com/api/](https://campus-sync-rjbz.onrender.com/api/)
 
 ---
 
-## 🚀 Features
+# 🚀 Features
 
-### 👥 Authentication & Users
-- JWT-based authentication  
-- Role-based access (Student / Organizer / Admin)  
-- Profile management  
-- Change password  
+## 👥 Authentication & Users
 
-### 🏫 Clubs
-- Create and manage clubs  
-- Assign organizer to each club  
-- Upload club image  
-- View club details  
-
-### 📅 Events
-- Organizers can create events  
-- Upcoming & past event filtering  
-- Event listing per club  
-
-### 💬 Messaging System
-- One-to-one chat between users  
-- Conversation creation  
-- Send & receive messages  
-- Auto-load chat from URL  
-- Modern chat UI  
-
-### 🎨 UI/UX
-- Clean dashboard layout  
-- Sidebar navigation  
-- Responsive design  
-- Smooth animations (Framer Motion)  
+* JWT-based authentication
+* Role-based access (Student / Organizer / Admin)
+* Student profile with ID card upload
+* Secure login & token handling
 
 ---
 
-## 🏗️ Tech Stack
+## 🏫 Clubs
 
-### 🔹 Backend
-- Python  
-- Django  
-- Django REST Framework  
-- SQLite (default, can switch to PostgreSQL)  
-- JWT Authentication  
-
-### 🔹 Frontend
-- React (Vite)  
-- TypeScript  
-- Tailwind CSS  
-- React Query  
-- Axios  
-- Framer Motion  
-- ShadCN UI  
+* Create and manage clubs
+* Assign organizers
+* Upload club logo/banner (Cloudinary)
+* View club details
 
 ---
 
-## 📁 Project Structure
+## 📅 Events
 
+* Organizers can create events
+* Admin approval system
+* Upcoming events carousel
+* Event registration system
+* Event analytics (views, registrations)
+
+---
+
+## 💬 Messaging System
+
+* One-to-one chat between users
+* Conversation-based messaging
+* Send & receive messages
+* Clean modern chat UI
+
+---
+
+## 🔍 Smart Search & UI
+
+* 🔎 Search dropdown (Top Navbar)
+* 🎯 Select suggestion → navigate to event
+* 🔄 Auto-sliding event carousel
+* Responsive modern UI
+
+---
+
+## 📊 Admin Dashboard
+
+* Manage events & clubs
+* Approve/reject events
+* View statistics (events, registrations)
+
+---
+
+# 🏗️ Tech Stack
+
+## 🔹 Backend
+
+* Python
+* Django
+* Django REST Framework
+* PostgreSQL (Render DB) ✅
+* JWT Authentication
+* Cloudinary (media storage)
+
+---
+
+## 🔹 Frontend
+
+* React (Vite)
+* TypeScript
+* Tailwind CSS
+* React Query
+* Axios
+* Framer Motion
+* ShadCN UI
+
+---
+
+## ☁️ Deployment
+
+| Service       | Platform            |
+| ------------- | ------------------- |
+| Frontend      | Vercel              |
+| Backend       | Render              |
+| Database      | PostgreSQL (Render) |
+| Media Storage | Cloudinary          |
+
+---
+
+# 📁 Project Structure
+
+```
 project/
 
-│
-
 ├── backend/
-
 │   ├── users/
-
 │   ├── clubs/
-
 │   ├── events/
-
 │   ├── chat/
-
+│   ├── backend/
 │   └── manage.py
 
-│
-
-├── campus-connect/   (frontend)
-
+├── frontend/
 │   ├── src/
-
 │   │   ├── pages/
-
 │   │   ├── components/
-
 │   │   ├── lib/
-
 │   │   ├── contexts/
 
-│
-
-├── venv/
-
 ├── requirements.txt
-
 └── README.md
-
-
+```
 
 ---
 
-## ⚙️ Backend Setup (Django)
+# ⚙️ Backend Setup (Django)
 
 ```bash
 # 1️⃣ Create Virtual Environment
 python -m venv venv
-venv\Scripts\activate   # Windows
+venv\Scripts\activate
 
 # 2️⃣ Install Dependencies
 pip install -r requirements.txt
 
-# 3️⃣ Apply Migrations
-python manage.py makemigrations
+# 3️⃣ Setup Environment Variables
+# create .env file
+SECRET_KEY=your_secret_key
+DATABASE_URL=your_postgres_url
+CLOUDINARY_URL=your_cloudinary_url
+
+# 4️⃣ Apply Migrations
 python manage.py migrate
 
-# 4️⃣ Create Superuser
+# 5️⃣ Create Superuser
 python manage.py createsuperuser
 
-# 5️⃣ Run Server
+# 6️⃣ Run Server
 python manage.py runserver
 ```
 
+---
 
-## 🌐 Frontend Setup (React)
-### 1️⃣ Install Dependencies
+# 🌐 Frontend Setup (React)
+
 ```bash
+# 1️⃣ Install Dependencies
 npm install
 
-# 2️⃣ Run Development Server
-npm run dev 
+# 2️⃣ Create .env file
+VITE_API_URL=http://localhost:8000/api/
+
+# 3️⃣ Run Development Server
+npm run dev
 ```
 
+---
 
-## 🔐 API Endpoints
-### Auth
-- POST /api/login/
+# 🔐 API Endpoints
 
-- POST /api/register/
+## Auth
 
-### Clubs
-- GET /api/clubs/
+* POST `/api/login/`
+* POST `/api/register/`
 
-- GET /api/clubs/:id/
+## Clubs
 
-- POST /api/clubs/
+* GET `/api/clubs/`
+* POST `/api/clubs/`
 
-### Events
-- GET /api/events/
+## Events
 
-- POST /api/events/
+* GET `/api/events/`
+* GET `/api/events/:id/`
+* POST `/api/events/`
+* POST `/api/events/:id/register/`
 
-### Chat
-- GET /api/chat/conversations/
+## Chat
 
-- GET /api/chat/messages/:id/
+* GET `/api/chat/conversations/`
+* GET `/api/chat/messages/:id/`
+* POST `/api/chat/send/`
 
-- POST /api/chat/send/
+---
 
-- POST /api/chat/create/
+# 🔑 Authentication
 
-
-
-## 🔑 Authentication
 Uses JWT tokens.
+
 Frontend stores:
 
-- Access token
+* Access token
+* Refresh token
 
-- Refresh token
+Headers:
 
-- Add token in headers:
-
-```
+```bash
 Authorization: Bearer <access_token>
 ```
 
+---
 
-## 💡 Key Concepts
-🧠 Conversation Logic
-- A conversation is created between 2 users
-- If already exists → reuse it
-- Messages belong to a conversation
+# 💡 Key Concepts
 
-🎯 Organizer Logic
-- Only organizers can create events
-- Others can message the club
+## 🧠 Event System
 
+* Events require admin approval
+* Students can register
+* Event interactions tracked
 
-## 🚀 Future Improvements
-- 🔥 Real-time chat (WebSockets)
+## 🎯 Search System
 
-- 🔔 Notifications
+* Live search dropdown
+* Keyboard navigation (↑ ↓ Enter)
+* Direct navigation to event
 
-- 📷 File/image sharing
+## 📦 Media Handling
 
-- 👥 Group chats
+* Images stored on Cloudinary
+* URLs served directly to frontend
 
-- 🌙 Dark mode
+---
+
+# 🚀 Future Improvements
+
+* 🔥 Real-time chat (WebSockets)
+* 🔔 Notifications system
+* 📷 File/image sharing in chat
+* 👥 Group chats
+* 🌙 Dark mode
+* 📊 Advanced analytics dashboard
+
+---
+
+# 👨‍💻 Author
+
+**Sanjay Kumar Sah**
+Full Stack Developer 🚀
+
+---
+
+# ⭐ Final Note
+
+This project demonstrates a **complete production-ready architecture**:
+
+```
+Frontend → Vercel
+Backend → Render
+Database → PostgreSQL
+Media → Cloudinary
+```
+
+---
+
+# 🎉 Your project is now FULLY DEPLOYED & PRODUCTION READY
