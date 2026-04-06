@@ -1,7 +1,7 @@
 from django.db import models
 from users.models import User
 from clubs.models import Club
-
+from cloudinary.models import CloudinaryField
 
 class Event(models.Model):
 
@@ -25,8 +25,8 @@ class Event(models.Model):
 
     location = models.CharField(max_length=200)
 
-    image = models.ImageField(
-        upload_to="event_images/",
+    image = CloudinaryField(
+        'event_image',
         null=True,
         blank=True
     )

@@ -1,6 +1,6 @@
 from django.db import models
 from users.models import User
-
+from cloudinary.models import CloudinaryField
 
 class Club(models.Model):
 
@@ -21,8 +21,8 @@ class Club(models.Model):
         default="GENERAL"
     )
 
-    image = models.ImageField(
-        upload_to="club_images/",
+    image = CloudinaryField(
+        'club_image',
         null=True,
         blank=True
     )

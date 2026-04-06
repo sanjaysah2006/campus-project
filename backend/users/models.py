@@ -1,6 +1,6 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
-
+from cloudinary.models import CloudinaryField
 
 class User(AbstractUser):
     ROLE_CHOICES = (
@@ -37,8 +37,8 @@ class StudentProfile(models.Model):
 
     phone = models.CharField(max_length=15)
 
-    id_card = models.ImageField(
-        upload_to="student_ids/",
+    id_card = CloudinaryField(
+        'student_id',
         null=True,
         blank=True
     )

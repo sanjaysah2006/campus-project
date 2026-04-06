@@ -34,6 +34,8 @@ ALLOWED_HOSTS = ["*"]
 # Application definition
 
 INSTALLED_APPS = [
+    'cloudinary',
+    'cloudinary_storage',
     'corsheaders',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -85,6 +87,16 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
+
+import cloudinary
+
+cloudinary.config(
+    cloud_name = "daygaxh6d",
+    api_key = "872312526588257",
+    api_secret = "2dlfpfEmPpMOQxDAGwq8hNB8r1E",
+)
+
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 
 DATABASES = {
     'default': {
