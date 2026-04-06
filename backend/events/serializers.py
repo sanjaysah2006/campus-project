@@ -24,17 +24,18 @@ class EventSerializer(serializers.ModelSerializer):
     organizer_name = serializers.CharField(source="organizer.username", read_only=True)
 
     def get_image(self, obj):
-        if obj.image:
-            try:
-                url = obj.image.url
+        try:
+            if obj.image:
+                url = str(obj.image)
 
-            # 🔥 skip old local media paths
-                if url.startswith("/media"):
+            # ❌ ignore broken local/cloudinary paths
+                if "event_images/" in url:
                     return None
 
-                return url
-            except:
-                return None
+                return obj.image.url
+        except:
+            return None
+
         return None
 
     def get_registrations(self, obj):
