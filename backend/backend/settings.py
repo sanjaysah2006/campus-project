@@ -91,9 +91,9 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 import cloudinary
 
 cloudinary.config(
-    cloud_name = "daygaxh6d",
-    api_key = "872312526588257",
-    api_secret = "2dlfpfEmPpMOQxDAGwq8hNB8r1E",
+    cloud_name = os.getenv("CLOUDINARY_CLOUD_NAME"),
+    api_key = os.getenv("CLOUDINARY_API_KEY"),
+    api_secret = os.getenv("CLOUDINARY_API_SECRET"),
 )
 
 STORAGES = {
@@ -104,6 +104,8 @@ STORAGES = {
         "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
     },
 }
+
+STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
 
 DATABASES = {
     'default': {
