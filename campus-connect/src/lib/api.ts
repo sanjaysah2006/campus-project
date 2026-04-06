@@ -1,11 +1,12 @@
 import axios from "axios";
 
 const API = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "/api/", // ✅ use env variable
-  withCredentials: true, // ✅ allow cookies
+  baseURL: import.meta.env.VITE_API_URL ,
+  withCredentials: true,
+  timeout: 10000,
 });
 
-/* 🔐 AUTO ADD TOKEN */
+/* 🔐 ADD TOKEN */
 API.interceptors.request.use((config) => {
   const token = localStorage.getItem("access");
 
@@ -15,5 +16,17 @@ API.interceptors.request.use((config) => {
 
   return config;
 });
+
+/* 🔐 HANDLE EXPIRED TOKEN */
+API.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response && error.response.status === 401) {
+      localStorage.removeItem("access");
+      window.location.href = "/login";
+    }
+    return Promise.reject(error);
+  }
+);
 
 export default API;

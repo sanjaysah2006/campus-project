@@ -85,7 +85,7 @@ export default function Login() {
       setIsLoading(false);
     }
   };
-
+console.log(import.meta.env.VITE_API_URL);
   return (
 
     <div className="min-h-screen bg-gradient-hero flex items-center justify-center p-4">

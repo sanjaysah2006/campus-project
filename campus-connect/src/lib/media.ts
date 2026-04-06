@@ -4,8 +4,9 @@ export const getMediaUrl = (path?: string | null): string | null => {
   // already full URL
   if (path.startsWith("http")) return path;
 
-  // 🔥 IMPORTANT: use same base as API
-  const base = import.meta.env.VITE_API_URL?.replace("/api/", "") || "";
+  // remove trailing /api or /api/
+  const base = import.meta.env.VITE_API_URL
+    ?.replace(/\/api\/?$/, "") || "";
 
   return `${base}${path}`;
 };

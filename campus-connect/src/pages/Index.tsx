@@ -2,20 +2,23 @@ import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { ArrowRight, Calendar, Users, TrendingUp } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useOutletContext } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import EventCarousel from "@/components/events/EventCarousel";
-import { EventCard } from "@/components/events/EventCard";
 import { ClubCard } from "@/components/clubs/ClubCard";
 import { useAuth } from "@/contexts/AuthContext";
 import API from "@/lib/api";
 import { Event, Club } from "@/types";
+import TopNav from "@/components/layout/TopNav";
 
 const Index = () => {
   const { user } = useAuth();
 
-  /* ---------------- FETCH EVENTS BASED ON ROLE ---------------- */
+  // ✅ GET SEARCH FROM MAIN LAYOUT
+  const { search } = useOutletContext<{ search: string }>();
+
+  /* ---------------- FETCH EVENTS ---------------- */
   const {
     data: events = [],
     isLoading: eventsLoading,
@@ -58,20 +61,25 @@ const Index = () => {
 
   const loading = eventsLoading || clubsLoading;
 
-  /* ---------------- DERIVED DATA ---------------- */
+  /* ---------------- FILTER EVENTS ---------------- */
   const upcomingEvents = useMemo(() => {
     return events
-      .filter(
-        (e: Event) =>
-          new Date(e.date) > new Date()
-      )
-      .slice(0, 4);
-  }, [events]);
+      .filter((e: Event) => new Date(e.date) > new Date()) // upcoming only
+      .filter((e: Event) =>
+        e.title.toLowerCase().includes(search.toLowerCase())
+      ) // 🔍 search filter
+      .sort(
+        (a: Event, b: Event) =>
+          new Date(a.date).getTime() - new Date(b.date).getTime()
+      );
+  }, [events, search]);
 
+  /* ---------------- FEATURED CLUBS ---------------- */
   const featuredClubs = useMemo(() => {
     return clubs.slice(0, 4);
   }, [clubs]);
 
+  /* ---------------- STATS ---------------- */
   const stats = [
     {
       label: "Active Clubs",
@@ -103,6 +111,7 @@ const Index = () => {
 
   return (
     <div className="space-y-8">
+      <TopNav events={events} />
       {/* Welcome */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
@@ -118,13 +127,11 @@ const Index = () => {
           </p>
         </div>
 
-        {(user?.role === "ORGANIZER" ) && (
-            <Link to="/events/create">
-              <Button variant="hero">
-                Create Event
-              </Button>
-            </Link>
-          )}
+        {/* {user?.role === "ORGANIZER" && (
+          <Link to="/events/create">
+            <Button variant="hero">Create Event</Button>
+          </Link>
+        )} */}
       </motion.div>
 
       {/* Stats */}
@@ -138,9 +145,7 @@ const Index = () => {
                 <stat.icon className="w-6 h-6" />
               </div>
               <div>
-                <p className="text-2xl font-bold">
-                  {stat.value}
-                </p>
+                <p className="text-2xl font-bold">{stat.value}</p>
                 <p className="text-sm text-muted-foreground">
                   {stat.label}
                 </p>
@@ -150,22 +155,16 @@ const Index = () => {
         ))}
       </div>
 
-      {/* Carousel */}
-      {events.length > 0 && (
-        <EventCarousel events={events} />
-      )}
-
       {/* Upcoming Events */}
       <section>
         <div className="flex items-center justify-between mb-5">
           <div>
-            <h2 className="text-2xl font-bold">
-              Upcoming Events
-            </h2>
+            <h2 className="text-2xl font-bold">Upcoming Events</h2>
             <p className="text-muted-foreground text-sm">
               Don’t miss these
             </p>
           </div>
+
           <Link to="/events">
             <Button variant="ghost">
               View All
@@ -174,31 +173,26 @@ const Index = () => {
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {upcomingEvents.map(
-            (event: Event, index: number) => (
-              <EventCard
-                key={event.id}
-                event={event}
-                index={index}
-                role={user?.role}
-              />
-            )
-          )}
-        </div>
+        {/* ✅ FIXED CAROUSEL */}
+        {upcomingEvents.length > 0 ? (
+          <EventCarousel events={upcomingEvents} />
+        ) : (
+          <p className="text-muted-foreground text-sm">
+            No upcoming events found
+          </p>
+        )}
       </section>
 
       {/* Featured Clubs */}
       <section>
         <div className="flex items-center justify-between mb-5">
           <div>
-            <h2 className="text-2xl font-bold">
-              Featured Clubs
-            </h2>
+            <h2 className="text-2xl font-bold">Featured Clubs</h2>
             <p className="text-muted-foreground text-sm">
               Explore communities
             </p>
           </div>
+
           <Link to="/clubs">
             <Button variant="ghost">
               View All
@@ -208,17 +202,12 @@ const Index = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {featuredClubs.map(
-            (club: Club, index: number) => (
-              <ClubCard
-                key={club.id}
-                club={club}
-                index={index}
-              />
-            )
-          )}
+          {featuredClubs.map((club: Club, index: number) => (
+            <ClubCard key={club.id} club={club} index={index} />
+          ))}
         </div>
       </section>
+
     </div>
   );
 };
