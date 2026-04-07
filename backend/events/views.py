@@ -21,20 +21,27 @@ from clubs.models import Club
 # ================================
 class CreateEventView(APIView):
     permission_classes = [IsAuthenticated]
+    parser_classes = [MultiPartParser, FormParser]  # ✅ important for image
 
     def post(self, request):
 
+        # ✅ role check
         if request.user.role != "ORGANIZER":
-            return Response({"detail": "Only organizers allowed"}, status=403)
+            return Response(
+                {"detail": "Only organizers allowed"},
+                status=status.HTTP_403_FORBIDDEN
+            )
 
+        # ✅ get club of organizer
         try:
             club = Club.objects.get(organizer=request.user)
         except Club.DoesNotExist:
             return Response(
                 {"error": "You are not assigned to any club"},
-                status=400
+                status=status.HTTP_400_BAD_REQUEST
             )
 
+        # ✅ serializer
         serializer = EventCreateSerializer(data=request.data)
 
         if serializer.is_valid():
@@ -44,12 +51,17 @@ class CreateEventView(APIView):
                 approved=False
             )
             return Response(
-                {"message": "Event created successfully"},
-                status=201
+                {
+                    "message": "Event created successfully",
+                    "data": serializer.data
+                },
+                status=status.HTTP_201_CREATED
             )
 
-        return Response(serializer.errors, status=400)
+        # 🔥 DEBUG (keep for now)
+        print("ERROR:", serializer.errors)
 
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 # ================================
 # LIST EVENTS (APPROVED ONLY)

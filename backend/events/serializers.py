@@ -3,13 +3,13 @@ from .models import Event
 
 
 class EventCreateSerializer(serializers.ModelSerializer):
+    image = serializers.ImageField(required=False)
+
     class Meta:
         model = Event
         fields = [
             "title",
             "description",
-            "club",
-            "organizer",
             "date",
             "location",
             "image",
@@ -28,7 +28,7 @@ class EventSerializer(serializers.ModelSerializer):
             if obj.image:
                 url = str(obj.image)
 
-            # ❌ ignore broken local/cloudinary paths
+                # ignore broken local/cloudinary paths
                 if "event_images/" in url:
                     return None
 
@@ -57,5 +57,4 @@ class EventSerializer(serializers.ModelSerializer):
             "approved",
             "created_at",
             "registrations",
-        ]  
-
+        ]
